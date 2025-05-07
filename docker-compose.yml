@@ -1,0 +1,16 @@
+name: neokikoeru
+
+services:
+  server:
+    image: ghcr.io/vscodev/neokikoeru:latest
+    ports:
+      - "2333:2333"
+    volumes:
+      - "./data/:/opt/neokikoeru/data/"
+    environment:
+      - TZ=Asia/Shanghai
+      - PUID=0
+      - PGID=0
+      - UMASK=022
+      - NEOKIKOERU_DLSITE_LOCALE=zh-CN
+    restart: unless-stopped
