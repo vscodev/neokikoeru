@@ -1,0 +1,64 @@
+name: "Feature request"
+description: Feature request
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The development principle of Neokikoeru is **small and elegant**, not **large and comprehensive**. Requests that go against the program's intent, are niche, or offer little benefit will not be implemented.  
+        Neokikoeru的开发准则是 **小而美** ，而非 **大而全** ，对于违背程序本意、偏小众或收益不大的需求是不会被实现的。
+
+  - type: checkboxes
+    attributes:
+      label: Please confirm the following / 请确认以下所有内容
+      description: |
+        You must check all the following items, otherwise your issue may be closed directly. Alternatively, you can go to the [Discussions](https://github.com/vscodev/neokikoeru/discussions).  
+        你必须勾选以下所有内容，否则你的issue可能会被直接关闭。或者你可以去 [讨论区](https://github.com/vscodev/neokikoeru/discussions) 。
+      options:
+        - label: |
+            I have read the [documentation](https://github.com/vscodev/neokikoeru/wiki) and [How To Ask Questions The Smart Way](http://www.catb.org/~esr/faqs/smart-questions.html).  
+            我已经阅读了 [文档](https://github.com/vscodev/neokikoeru/wiki) 和 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md) 。
+          required: true
+        - label: |
+            I confirm there are no duplicate issues or discussions.  
+            我确定没有重复的issue或讨论。
+        - label: |
+            I confirm this is a widely applicable need, not just a personal preference.  
+            我确定这是一个受众需求而不是单纯出于个人意愿。
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Neokikoeru Version / Neokikoeru 版本
+      description: |
+        Which version of the software are you using? You can find it in `Dashboard` -> `System Info` -> `Version`.  
+        你使用的是哪个版本的软件？你可以在 `仪表盘` -> `系统信息` -> `程序版本` 中找到。
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description / 需求描述
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: Suggested Solution / 实现思路
+      description: |
+        The proposed approach to implementing this feature.  
+        实现此需求的解决思路。
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context / 附件
+      description: |
+        Any other relevant context, screenshots, or information you think might be helpful.  
+        相关的任何其他上下文或截图，或者你觉得有帮助的信息。

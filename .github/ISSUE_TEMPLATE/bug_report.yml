@@ -1,0 +1,64 @@
+name: "Bug report"
+description: Bug report
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to fill out this bug report. Please **make sure your issue is not a duplicate and is not caused by your operation or version issues**.  
+        感谢你花时间填写此错误报告，请 **务必确认你的issue不是重复的且不是因为你的操作或版本问题** 。
+
+  - type: checkboxes
+    attributes:
+      label: Please confirm the following / 请确认以下内容
+      description: |
+        You must check all the following items, otherwise your issue may be closed directly. Alternatively, you can go to the [Discussions](https://github.com/vscodev/neokikoeru/discussions).  
+        你必须勾选以下所有内容，否则你的issue可能会被直接关闭。或者你可以去 [讨论区](https://github.com/vscodev/neokikoeru/discussions) 。
+      options:
+        - label: |
+            I have read the [documentation](https://github.com/vscodev/neokikoeru/wiki) and [How To Ask Questions The Smart Way](http://www.catb.org/~esr/faqs/smart-questions.html).  
+            我已经阅读了 [文档](https://github.com/vscodev/neokikoeru/wiki) 和 [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md) 。
+          required: true
+        - label: |
+            I confirm there are no duplicate issues or discussions.  
+            我确定没有重复的issue或讨论。
+        - label: |
+            I confirm the issue is with the program itself, not due to other reasons.  
+            我确定是程序本身的问题，而不是其他原因。
+
+  - type: input
+    id: version
+    attributes:
+      label: Neokikoeru Version / Neokikoeru 版本
+      description: |
+        Which version of the software are you using? You can find it in `Dashboard` -> `System Info` -> `Version`.  
+        你使用的是哪个版本的软件？你可以在 `仪表盘` -> `系统信息` -> `程序版本` 中找到。
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: driver
+    attributes:
+      label: Storage Driver Used / 使用的存储驱动
+      description: |
+        Which storage driver are you using?  
+        你使用的是哪个存储驱动？
+      placeholder: "OneDrive"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Issue Description / 问题描述
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / 日志
+      description: |
+        Please copy and paste the error logs or provide a screenshot.  
+        请复制粘贴错误日志，或者截图。
