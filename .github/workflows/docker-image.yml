@@ -1,0 +1,159 @@
+name: Publish Docker image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Neokikoeru Version'
+        required: true
+        default: 'v0.0.0'
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  ZIG_VERSION: 0.14.0
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "linux/amd64"
+            arch: "amd64"
+            target: "x86_64-linux-musl"
+          - platform: "linux/arm64"
+            arch: "arm64"
+            target: "aarch64-linux-musl"
+          - platform: "linux/386"
+            arch: "386"
+            target: "x86-linux-musl"
+          - platform: "linux/s390x"
+            arch: "s390x"
+            target: "s390x-linux-musl"
+          - platform: "linux/riscv64"
+            arch: "riscv64"
+            target: "riscv64-linux-musl"
+          - platform: "linux/ppc64le"
+            arch: "ppc64le"
+            target: "powerpc64le-linux-musl"
+          - platform: "linux/arm/v6"
+            arch: "arm"
+            arm: "6"
+            target: "arm-linux-musleabi"
+          - platform: "linux/arm/v7"
+            arch: "arm"
+            arm: "7"
+            target: "arm-linux-musleabihf"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GH_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+
+      - name: Install Zig
+        run: |
+          wget -c https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'web/package.json'
+          check-latest: true
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Build frontend
+        run: |
+          pnpm install
+          pnpm build:pwa
+          cp -a dist/pwa/. $GITHUB_WORKSPACE/public/dist/
+        working-directory: ./web
+
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          go mod download
+          export GOARCH=${{ matrix.arch }}
+          if [[ -n "${{ matrix.arm }}" ]]; then
+            export GOARM=${{ matrix.arm }}
+          fi
+          export CC="zig cc -target ${{ matrix.target }}"
+          bash build.sh ${{ inputs.version }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLATFORM_PAIR }}
+          path: neokikoeru
+          if-no-files-found: error
+          retention-days: 1
+
+  push:
+    needs: build
+    name: Push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GH_REPO }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ci.Dockerfile
+          platforms: "linux/amd64,linux/arm64,linux/arm/v7,linux/386,linux/arm/v6,linux/s390x,linux/ppc64le,linux/riscv64"
+          push: true
+          tags: |
+            vscodev/neokikoeru:latest
+            ghcr.io/vscodev/neokikoeru:latest
