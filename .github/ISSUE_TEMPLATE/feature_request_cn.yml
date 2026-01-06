@@ -1,0 +1,23 @@
+name: 功能请求
+description: 期望Neokikoeru增加的功能
+labels: [enhancement]
+body:
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 功能描述
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: 实现思路
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 附加说明
+      description: 相关的任何其他上下文或截图，或者你觉得有帮助的信息

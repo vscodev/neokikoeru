@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Neokikoeru Version'
+        type: string
+        default: '0.0.0'
+      use-homebrew:
+        description: Should binaries be released to Homebrew?
+        type: boolean
+        default: false
+      use-scoop:
+        description: Should binaries be released to Scoop?
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  NEOKIKOERU_VERSION: ${{ inputs.version }}
+  ZIG_VERSION: 0.15.2
+  TZ: Asia/Shanghai
+
+jobs:
+  release-github:
+    name: Release to GitHub
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GH_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'web/package.json'
+          check-latest: true
+
+      - name: Prepare
+        run: |
+          wget -c https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-aarch64-macos-${{ env.ZIG_VERSION }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin
+          npm install -g @go-task/cli pnpm@9
+
+      - name: Build
+        run: |
+          task clean --silent
+          task release --silent
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ env.NEOKIKOERU_VERSION }}
+          tag_name: v${{ env.NEOKIKOERU_VERSION }}
+          body_path: CHANGELOG.md
+          files: |
+            ./dist/*
+          token: ${{ secrets.MY_PAT }}
+
+  release-homebrew:
+    name: Release to Homebrew
+    runs-on: ubuntu-latest
+    needs: release-github
+    if: ${{ inputs.use-homebrew }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: vscodev/homebrew-tap
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Update Tap
+        run: |
+          go mod tidy
+          go tool neokikoeru
+
+      - name: Commit Tap
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Release Neokikoeru v${{ env.NEOKIKOERU_VERSION }}
+          commit_user_name: vscodev
+          commit_user_email: 71597201+vscodev@users.noreply.github.com
+          commit_author: vscodev <71597201+vscodev@users.noreply.github.com>
+
+  relese-scoop:
+    name: Release to Scoop
+    runs-on: ubuntu-latest
+    needs: release-github
+    if: ${{ inputs.use-scoop }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: vscodev/scoop-bucket
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      - name: Update Bucket
+        run: |
+          go mod tidy
+          go tool neokikoeru
+
+      - name: Commit Bucket
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Release Neokikoeru v${{ env.NEOKIKOERU_VERSION }}
+          commit_user_name: vscodev
+          commit_user_email: 71597201+vscodev@users.noreply.github.com
+          commit_author: vscodev <71597201+vscodev@users.noreply.github.com>

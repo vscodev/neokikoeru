@@ -1,0 +1,49 @@
+name: Bug反馈
+description: 提交Neokikoeru使用过程中遇到的Bug
+labels: [bug]
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 问题描述
+      description: 发生了什么问题？你预期的正常行为是什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 复现步骤
+      description: 请列出可稳定复现问题的操作步骤
+    validations:
+      required: true
+
+  - type: input
+    id: neokikoeru-version
+    attributes:
+      label: Neokikoeru版本
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: storage-driver
+    attributes:
+      label: 使用的存储驱动
+      placeholder: OneDrive
+    validations:
+      required: true
+
+  - type: input
+    id: system-environment
+    attributes:
+      label: 操作系统以及浏览器信息
+      placeholder: Windows 11 Chrome 142.0.7444.176
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 补充信息
+      description: 错误日志/截图/相关配置...
