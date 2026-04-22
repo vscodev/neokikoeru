@@ -121,47 +121,12 @@ $ docker compose up -d
 
 ```
 location / {
-    proxy_pass         http://127.0.0.1:5233;
+    proxy_pass http://127.0.0.1:5233;
     proxy_http_version 1.1;
-    proxy_cache_bypass $http_upgrade;
-
-    # Proxy SSL
-    proxy_ssl_server_name on;
-
-    # Proxy headers
-    proxy_set_header Host              $host;
-    proxy_set_header Upgrade           $http_upgrade;
-    proxy_set_header Connection        $connection_upgrade;
-    proxy_set_header X-Real-IP         $remote_addr;
-    proxy_set_header Forwarded         $proxy_add_forwarded;
-    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-Host  $host;
-    proxy_set_header X-Forwarded-Port  $server_port;
-
-    # Proxy timeouts
-    proxy_connect_timeout              60s;
-    proxy_send_timeout                 60s;
-    proxy_read_timeout                 60s;
+    proxy_set_header X-Forwarded-Port $server_port;
 }
 ```
-
-你可能还需要在 `http` 块中添加
-
-```
-map $http_upgrade $connection_upgrade {
-    default upgrade;
-    ''      close;
-}
-```
-
-## 注意事项
-
-Neokikoeru 偶尔会出现破坏性更新，一般是数据库模式有变动。如果更新后程序运行异常，你可运行以下命令清除应用数据重新初始化。
-
-```sh
-$ neokikoeru prune
-```
-
-> [!CAUTION]
-> 该命令会彻底删除全部应用数据，无法恢复，请谨慎操作！
